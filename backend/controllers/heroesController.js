@@ -125,7 +125,7 @@ const createHero = async (req, res) => {
 const updateHero = async (req, res) => {
   const { id } = req.params;
 
-  const {
+    const {
     name,
     nickname,
     date_of_birth,
@@ -135,25 +135,33 @@ const updateHero = async (req, res) => {
     is_active
   } = req.body;
 
+  const safeName = typeof name === 'undefined' ? null : name;
+  const safeNickname = typeof nickname === 'undefined' ? null : nickname;
+  const safeDateOfBirth = typeof date_of_birth === 'undefined' ? null : date_of_birth;
+  const safeUniverse = typeof universe === 'undefined' ? null : universe;
+  const safeMainPower = typeof main_power === 'undefined' ? null : main_power;
+  const safeAvatarUrl = typeof avatar_url === 'undefined' ? null : avatar_url;
+  const safeIsActive = typeof is_active === 'undefined' ? null : is_active;
+
   const [result] = await connection.execute(
     `UPDATE heroes
      SET
-      name = ?,
-      nickname = ?,
-      date_of_birth = ?,
-      universe = ?,
-      main_power = ?,
-      avatar_url = ?,
-      is_active = ?
+      name = COALESCE(?, name),
+      nickname = COALESCE(?, nickname),
+      date_of_birth = COALESCE(?, date_of_birth),
+      universe = COALESCE(?, universe),
+      main_power = COALESCE(?, main_power),
+      avatar_url = COALESCE(?, avatar_url),
+      is_active = COALESCE(?, is_active)
      WHERE id = ?`,
     [
-      name,
-      nickname,
-      date_of_birth,
-      universe,
-      main_power,
-      avatar_url,
-      is_active,
+      safeName,
+      safeNickname,
+      safeDateOfBirth,
+      safeUniverse,
+      safeMainPower,
+      safeAvatarUrl,
+      safeIsActive,
       id
     ]
   );

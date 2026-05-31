@@ -1,8 +1,8 @@
-import { Box, Button, IconButton, InputAdornment, Pagination, TextField, Typography } from '@mui/material';
+import { Alert, Box, Button, IconButton, InputAdornment, Pagination, Snackbar, TextField, Typography } from '@mui/material';
 import { Modal } from '../components/Modal';
 import React from 'react';
 import { CreateHero } from '../components/CreateHero';
-import { useHeroes } from '../hooks/useHeroes';
+import { useHeroes, useDeleteHero, useUpdateHero } from '../hooks/useHeroes';
 import { HeroCard } from '../components/HeroCard';
 import { createHero } from '../services/api';
 import ClearIcon from '@mui/icons-material/Clear';
@@ -12,10 +12,13 @@ import Loading from '../components/Loading';
 
 export const HeroesList = () => {
   const [isModalOpen, setIsModalOpen] = React.useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = React.useState(false);
+  const [editingHero, setEditingHero] = React.useState<Hero | null>(null);
   const [page, setPage] = React.useState(1);
   const [queryInput, setQueryInput] = React.useState('');
   const deferredQuery = React.useDeferredValue(queryInput);
   const [queryForSearch, setQueryForSearch] = React.useState<string | undefined>(undefined);
+  const [openSnackbar, setOpenSnackbar] = React.useState(false);
 
   const handleOpenCloseModal = () => {
     setIsModalOpen((prev) => !prev);
@@ -33,6 +36,8 @@ export const HeroesList = () => {
 
 
   const { heroes, page: currentPage, totalPages, isLoading, error, refresh } = useHeroes({ search: queryForSearch, page, limit: 10 });
+  const { deleteHero: deleteHeroMutation, isDeleting, deleteError } = useDeleteHero();
+  const { updateHero: updateHeroMutation, isUpdating, updateError } = useUpdateHero();
 
   const handleCreateHero = async (heroPayload: {
     name: string;
@@ -42,7 +47,7 @@ export const HeroesList = () => {
     main_power: string;
     avatar_url: string;
   }) => {
-    try { 
+    try {
       await createHero(heroPayload);
       refresh();
       setIsModalOpen(false);
@@ -51,13 +56,47 @@ export const HeroesList = () => {
     }
   };
 
-  if (isLoading) {
+  const handleEditHero = (hero: Hero) => {
+    setEditingHero(hero);
+    setIsEditModalOpen(true);
+  };
+
+  const handleUpdateHero = async (heroPayload: {
+    name: string;
+    nickname: string;
+    date_of_birth: string;
+    universe: string;
+    main_power: string;
+    avatar_url: string;
+  }) => {
+    try {
+      if (editingHero) {
+        await updateHeroMutation({ heroId: editingHero.id, payload: heroPayload });
+        refresh();
+        setIsEditModalOpen(false);
+        setEditingHero(null);
+      }
+    } catch (error) {
+      setOpenSnackbar(true);
+      throw error;
+    }
+  };
+
+  const handleDeleteHero = async (heroId: string) => {
+    try {
+      await deleteHeroMutation(heroId);
+      refresh();
+    } catch (error) {
+      setOpenSnackbar(true);
+      throw error;
+    }
+  };
+
+  if (isLoading || isDeleting || isUpdating) {
     return <Loading />;
   }
 
-  if (error) {
-    return <div>Erro ao carregar heróis. Verifique o backend e atualize a página.</div>;
-  }
+
 
   return (
     <>
@@ -101,7 +140,13 @@ export const HeroesList = () => {
         <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', flexWrap: 'wrap', gap: 2 }}>
 
           {heroes.map((hero: Hero) => (
-            <HeroCard key={hero.id} hero={hero} />
+            <HeroCard
+              key={hero.id}
+              hero={hero}
+              onEdit={handleEditHero}
+              onDelete={handleDeleteHero}
+              onDeleteSuccess={() => refresh()}
+            />
           ))}
 
           {!heroes.length && <Typography variant="h6">Nenhum herói encontrado.</Typography>}
@@ -128,6 +173,49 @@ export const HeroesList = () => {
       >
         <CreateHero onSubmit={handleCreateHero} />
       </Modal>
+
+      <Modal
+        open={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        title="Editar Herói"
+        actions={
+          <>
+            <Button onClick={() => setIsEditModalOpen(false)}>Cancelar</Button>
+            <Button type="submit" form="subscription-form">
+              Atualizar
+            </Button>
+          </>
+        }
+      >
+        {editingHero && (
+          <CreateHero
+            key={editingHero.id}
+            onSubmit={handleUpdateHero}
+            values={editingHero}
+          />
+        )}
+      </Modal>
+
+
+      {
+        error &&
+        <Snackbar open={openSnackbar} autoHideDuration={3000} onClose={() => setOpenSnackbar(false)} >
+          <Alert severity="error">Erro ao carregar heróis. Tente novamente.</Alert>
+        </Snackbar>
+      }
+
+      {deleteError &&
+        <Snackbar open={openSnackbar} autoHideDuration={3000} onClose={() => setOpenSnackbar(false)} >
+          <Alert severity="error">Erro ao deletar herói. Tente novamente.</Alert>
+        </Snackbar>
+      }
+
+      {updateError &&
+        <Snackbar open={openSnackbar} autoHideDuration={3000} onClose={() => setOpenSnackbar(false)} >
+          <Alert severity="error">Erro ao atualizar herói. Tente novamente.</Alert>
+        </Snackbar>
+      }
+
     </>
   );
 };

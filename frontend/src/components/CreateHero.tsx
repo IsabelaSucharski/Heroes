@@ -15,23 +15,32 @@ export type CreateHeroFormData = z.infer<typeof heroSchema>;
 
 type CreateHeroProps = {
   onSubmit: (data: CreateHeroFormData) => void;
+  values?: Partial<CreateHeroFormData>;
 };
 
-export const CreateHero = ({ onSubmit }: CreateHeroProps) => {
+const initialFormValues: CreateHeroFormData = {
+  name: '',
+  nickname: '',
+  date_of_birth: '',
+  universe: '',
+  main_power: '',
+  avatar_url: '',
+};
+
+export const CreateHero = ({ onSubmit, values }: CreateHeroProps) => {
+  const [formValues, setFormValues] = React.useState<CreateHeroFormData>(values ? { ...initialFormValues, ...values } : initialFormValues);
   const [errors, setErrors] = React.useState<Partial<Record<keyof CreateHeroFormData, string>>>({});
+
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = event.target;
+    setFormValues((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
-    const formData = new FormData(event.currentTarget);
-    const formValues = {
-      name: formData.get('name')?.toString().trim() ?? '',
-      nickname: formData.get('nickname')?.toString().trim() ?? '',
-      date_of_birth: formData.get('date_of_birth')?.toString().trim() ?? '',
-      universe: formData.get('universe')?.toString().trim() ?? '',
-      main_power: formData.get('main_power')?.toString().trim() ?? '',
-      avatar_url: formData.get('avatar_url')?.toString().trim() ?? '',
-    };
 
     const parsed = heroSchema.safeParse(formValues);
     if (!parsed.success) {
@@ -47,7 +56,9 @@ export const CreateHero = ({ onSubmit }: CreateHeroProps) => {
     }
 
     setErrors({});
-    event.currentTarget.reset();
+    if (!values) {
+      setFormValues(initialFormValues);
+    }
     onSubmit(parsed.data);
   };
 
@@ -63,6 +74,8 @@ export const CreateHero = ({ onSubmit }: CreateHeroProps) => {
         type="text"
         fullWidth
         variant="outlined"
+        value={formValues.name}
+        onChange={handleChange}
         error={Boolean(errors.name)}
         helperText={errors.name}
       />
@@ -75,6 +88,8 @@ export const CreateHero = ({ onSubmit }: CreateHeroProps) => {
         type="text"
         fullWidth
         variant="outlined"
+        value={formValues.nickname}
+        onChange={handleChange}
         error={Boolean(errors.nickname)}
         helperText={errors.nickname}
       />
@@ -89,6 +104,8 @@ export const CreateHero = ({ onSubmit }: CreateHeroProps) => {
           type="date"
           fullWidth
           variant="outlined"
+          value={formValues.date_of_birth}
+          onChange={handleChange}
           error={Boolean(errors.date_of_birth)}
           helperText={errors.date_of_birth}
         />
@@ -101,6 +118,8 @@ export const CreateHero = ({ onSubmit }: CreateHeroProps) => {
           type="text"
           fullWidth
           variant="outlined"
+          value={formValues.universe}
+          onChange={handleChange}
           error={Boolean(errors.universe)}
           helperText={errors.universe}
         />
@@ -116,6 +135,8 @@ export const CreateHero = ({ onSubmit }: CreateHeroProps) => {
           type="text"
           fullWidth
           variant="outlined"
+          value={formValues.main_power}
+          onChange={handleChange}
           error={Boolean(errors.main_power)}
           helperText={errors.main_power}
         />
@@ -128,6 +149,8 @@ export const CreateHero = ({ onSubmit }: CreateHeroProps) => {
           type="text"
           fullWidth
           variant="outlined"
+          value={formValues.avatar_url}
+          onChange={handleChange}
           error={Boolean(errors.avatar_url)}
           helperText={errors.avatar_url}
         />

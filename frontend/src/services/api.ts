@@ -23,3 +23,20 @@ export const createHero = async (hero: {
   const response = await api.post('/heroes', hero);
   return response.data;
 };
+
+export const deleteHero = async (heroId: string) => {
+  const response = await api.delete(`/heroes/${heroId}`);
+  return response.data;
+};
+
+export const updateHero = async (heroId: string, hero: {
+  name: string;
+  nickname: string;
+  date_of_birth: string;
+  universe: string;
+  main_power: string;
+  avatar_url: string;
+}) => {
+  const response = await api.put(`/heroes/${heroId}`, hero);
+  return response.data;
+};
