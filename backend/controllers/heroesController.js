@@ -1,13 +1,64 @@
 const connection = require('../database/connection');
 const { v4: uuidv4 } = require('uuid');
 
-// GET ALL
-const getHeroes = async (req, res) => {
-  const [heroes] = await connection.execute(
-    'SELECT * FROM heroes'
-  );
+// FILTER FUNCTIONS
 
-  res.json(heroes);
+
+const filterByNameOrNickname = async (search, limit, offset) => {
+  const [heroes] = await connection.execute(
+    `SELECT * FROM heroes WHERE name LIKE ? OR nickname LIKE ? LIMIT ${limit} OFFSET ${offset}`,
+    [`%${search}%`, `%${search}%`]
+  );
+  const [countResult] = await connection.execute(
+    'SELECT COUNT(*) as total FROM heroes WHERE name LIKE ? OR nickname LIKE ?',
+    [`%${search}%`, `%${search}%`]
+  );
+  return { heroes, total: countResult[0].total };
+};
+
+
+
+const getAllHeroes = async (limit, offset) => {
+  const [heroes] = await connection.execute(
+    `SELECT * FROM heroes LIMIT ${limit} OFFSET ${offset}`
+  );
+  const [countResult] = await connection.execute(
+    'SELECT COUNT(*) as total FROM heroes'
+  );
+  return { heroes, total: countResult[0].total };
+};
+
+// GET ALL WITH FILTERS
+const getHeroes = async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  const offset = (page - 1) * limit;
+  const { search } = req.query;
+
+  try {
+    let result;
+
+    if (search) {
+      result = await filterByNameOrNickname(search, limit, offset);
+    } else {
+      result = await getAllHeroes(limit, offset);
+    }
+
+    const totalPages = Math.ceil(result.total / limit);
+
+    res.json({
+      data: result.heroes,
+      page,
+      limit,
+      total: result.total,
+      totalPages,
+      filters: {
+        search: search || null
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Erro ao buscar heróis', error: error.message });
+  }
 };
 
 // GET BY ID
