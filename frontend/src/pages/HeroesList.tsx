@@ -98,7 +98,7 @@ export const HeroesList = () => {
     try {
       await updateHeroMutation({ heroId, payload: { is_active: isActive } });
       refresh();
-      showSnackbar('Herói ativado com sucesso!', 'success');
+      showSnackbar(`Herói ${isActive ? 'ativado' : 'desativado'} com sucesso!`, 'success');
     } catch (error) {
       console.error('Erro ao ativar herói', error);
       showSnackbar('Erro ao ativar herói. Tente novamente.', 'error');
