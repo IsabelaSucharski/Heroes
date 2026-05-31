@@ -6,7 +6,7 @@ interface ModalProps {
   open: boolean;
   onClose: () => void;
   title?: string;
-  children: React.ReactNode;
+  children?: React.ReactNode;
   actions?: React.ReactNode;
 }
 
@@ -22,9 +22,11 @@ export const Modal = ({ open, onClose, title, children, actions }: ModalProps) =
       }}
     >
      <DialogTitle>{title}</DialogTitle>
-     <DialogContent>
-       {children}
-     </DialogContent>
+    {children && (
+      <DialogContent>
+        {children}
+      </DialogContent>
+    )}
      {actions && (
        <DialogActions>
          {actions}
