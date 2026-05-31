@@ -91,6 +91,11 @@ const createHero = async (req, res) => {
   } = req.body;
 
   const id = uuidv4();
+  
+  // Converter data ISO para YYYY-MM-DD
+  const dateForDB = date_of_birth && typeof date_of_birth === 'string' 
+    ? date_of_birth.split('T')[0] 
+    : date_of_birth;
 
   await connection.execute(
     `INSERT INTO heroes
@@ -108,7 +113,7 @@ const createHero = async (req, res) => {
       id,
       name,
       nickname,
-      date_of_birth,
+      dateForDB,
       universe,
       main_power,
       avatar_url
@@ -141,7 +146,13 @@ const updateHero = async (req, res) => {
   allowedFields.forEach((field) => {
     if (Object.prototype.hasOwnProperty.call(req.body, field)) {
       fields.push(`${field} = ?`);
-      const value = req.body[field];
+      let value = req.body[field];
+      
+      // Converter data ISO para YYYY-MM-DD
+      if (field === 'date_of_birth' && value && typeof value === 'string') {
+        value = value.split('T')[0];
+      }
+      
       values.push(typeof value === 'undefined' ? null : value);
     }
   });

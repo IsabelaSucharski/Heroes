@@ -27,8 +27,25 @@ const initialFormValues: CreateHeroFormData = {
   avatar_url: '',
 };
 
+const formatDateForInput = (dateString: string) => {
+  if (!dateString) return '';
+  // Converter ISO format '2026-05-12T00:00:00.000Z' para '2026-05-12'
+  if (dateString.includes('T')) {
+    return dateString.split('T')[0];
+  }
+  return dateString;
+};
+
 export const CreateHero = ({ onSubmit, values }: CreateHeroProps) => {
-  const [formValues, setFormValues] = React.useState<CreateHeroFormData>(values ? { ...initialFormValues, ...values } : initialFormValues);
+  const [formValues, setFormValues] = React.useState<CreateHeroFormData>(
+    values 
+      ? { 
+          ...initialFormValues, 
+          ...values,
+          date_of_birth: formatDateForInput(values.date_of_birth || '')
+        } 
+      : initialFormValues
+  );
   const [errors, setErrors] = React.useState<Partial<Record<keyof CreateHeroFormData, string>>>({});
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -59,7 +76,13 @@ export const CreateHero = ({ onSubmit, values }: CreateHeroProps) => {
     if (!values) {
       setFormValues(initialFormValues);
     }
-    onSubmit(parsed.data);
+    
+    const dataToSubmit = {
+      ...parsed.data,
+      date_of_birth: formatDateForInput(parsed.data.date_of_birth)
+    };
+    
+    onSubmit(dataToSubmit);
   };
 
   return (
