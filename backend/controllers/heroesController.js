@@ -6,7 +6,7 @@ const { v4: uuidv4 } = require('uuid');
 
 const filterByNameOrNickname = async (search, limit, offset) => {
   const [heroes] = await connection.execute(
-    `SELECT * FROM heroes WHERE name LIKE ? OR nickname LIKE ? LIMIT ${limit} OFFSET ${offset}`,
+    `SELECT * FROM heroes WHERE name LIKE ? OR nickname LIKE ? ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}`,
     [`%${search}%`, `%${search}%`]
   );
   const [countResult] = await connection.execute(
@@ -20,7 +20,7 @@ const filterByNameOrNickname = async (search, limit, offset) => {
 
 const getAllHeroes = async (limit, offset) => {
   const [heroes] = await connection.execute(
-    `SELECT * FROM heroes LIMIT ${limit} OFFSET ${offset}`
+    `SELECT * FROM heroes ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}`
   );
   const [countResult] = await connection.execute(
     'SELECT COUNT(*) as total FROM heroes'

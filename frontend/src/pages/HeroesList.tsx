@@ -19,6 +19,8 @@ export const HeroesList = () => {
   const deferredQuery = React.useDeferredValue(queryInput);
   const [queryForSearch, setQueryForSearch] = React.useState<string | undefined>(undefined);
   const [openSnackbar, setOpenSnackbar] = React.useState(false);
+  const [snackbarMessage, setSnackbarMessage] = React.useState('');
+  const [snackbarSeverity, setSnackbarSeverity] = React.useState<'error' | 'success'>('error');
 
   const handleOpenCloseModal = () => {
     setIsModalOpen((prev) => !prev);
@@ -34,10 +36,16 @@ export const HeroesList = () => {
     setQueryForSearch(undefined);
   };
 
+  const showSnackbar = (message: string, severity: 'error' | 'success' = 'success') => {
+    setSnackbarMessage(message);
+    setSnackbarSeverity(severity);
+    setOpenSnackbar(true);
+  };
 
-  const { heroes, page: currentPage, totalPages, isLoading, error, refresh } = useHeroes({ search: queryForSearch, page, limit: 10 });
-  const { deleteHero: deleteHeroMutation, isDeleting, deleteError } = useDeleteHero();
-  const { updateHero: updateHeroMutation, isUpdating, updateError } = useUpdateHero();
+
+  const { heroes, page: currentPage, totalPages, isLoading, refresh } = useHeroes({ search: queryForSearch, page, limit: 10 });
+  const { deleteHero: deleteHeroMutation, isDeleting } = useDeleteHero();
+  const { updateHero: updateHeroMutation, isUpdating } = useUpdateHero();
 
   const handleCreateHero = async (heroPayload: {
     name: string;
@@ -51,8 +59,10 @@ export const HeroesList = () => {
       await createHero(heroPayload);
       refresh();
       setIsModalOpen(false);
+      showSnackbar('Herói criado com sucesso!', 'success');
     } catch (error) {
       console.error('Erro ao cadastrar herói', error);
+      showSnackbar('Erro ao criar herói. Tente novamente.', 'error');
     }
   };
 
@@ -75,9 +85,11 @@ export const HeroesList = () => {
         refresh();
         setIsEditModalOpen(false);
         setEditingHero(null);
+        showSnackbar('Herói atualizado com sucesso!', 'success');
       }
     } catch (error) {
-      setOpenSnackbar(true);
+      console.error('Erro ao atualizar herói', error);
+      showSnackbar('Erro ao atualizar herói. Tente novamente.', 'error');
       throw error;
     }
   };
@@ -86,8 +98,10 @@ export const HeroesList = () => {
     try {
       await updateHeroMutation({ heroId, payload: { is_active: isActive } });
       refresh();
+      showSnackbar('Herói ativado com sucesso!', 'success');
     } catch (error) {
-      setOpenSnackbar(true);
+      console.error('Erro ao ativar herói', error);
+      showSnackbar('Erro ao ativar herói. Tente novamente.', 'error');
       throw error;
     }
   };
@@ -96,8 +110,10 @@ export const HeroesList = () => {
     try {
       await deleteHeroMutation(heroId);
       refresh();
+      showSnackbar('Herói deletado com sucesso!', 'success');
     } catch (error) {
-      setOpenSnackbar(true);
+      console.error('Erro ao deletar herói', error);
+      showSnackbar('Erro ao deletar herói. Tente novamente.', 'error');
       throw error;
     }
   };
@@ -208,24 +224,9 @@ export const HeroesList = () => {
       </Modal>
 
 
-      {
-        error &&
-        <Snackbar open={openSnackbar} autoHideDuration={3000} onClose={() => setOpenSnackbar(false)} >
-          <Alert severity="error">Erro ao carregar heróis. Tente novamente.</Alert>
-        </Snackbar>
-      }
-
-      {deleteError &&
-        <Snackbar open={openSnackbar} autoHideDuration={3000} onClose={() => setOpenSnackbar(false)} >
-          <Alert severity="error">Erro ao deletar herói. Tente novamente.</Alert>
-        </Snackbar>
-      }
-
-      {updateError &&
-        <Snackbar open={openSnackbar} autoHideDuration={3000} onClose={() => setOpenSnackbar(false)} >
-          <Alert severity="error">Erro ao atualizar herói. Tente novamente.</Alert>
-        </Snackbar>
-      }
+      <Snackbar open={openSnackbar} autoHideDuration={3000} onClose={() => setOpenSnackbar(false)}>
+        <Alert severity={snackbarSeverity}>{snackbarMessage}</Alert>
+      </Snackbar>
 
     </>
   );
