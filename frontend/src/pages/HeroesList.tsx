@@ -82,6 +82,16 @@ export const HeroesList = () => {
     }
   };
 
+  const handleActivateHero = async (heroId: string, isActive: boolean) => {
+    try {
+      await updateHeroMutation({ heroId, payload: { is_active: isActive } });
+      refresh();
+    } catch (error) {
+      setOpenSnackbar(true);
+      throw error;
+    }
+  };
+
   const handleDeleteHero = async (heroId: string) => {
     try {
       await deleteHeroMutation(heroId);
@@ -146,6 +156,7 @@ export const HeroesList = () => {
               onEdit={handleEditHero}
               onDelete={handleDeleteHero}
               onDeleteSuccess={() => refresh()}
+              onActivate={handleActivateHero}
             />
           ))}
 

@@ -1,5 +1,5 @@
 import { Delete, Edit } from "@mui/icons-material"
-import { MenuItem, Menu } from "@mui/material"
+import { MenuItem, Menu, Switch } from "@mui/material"
 
 interface ActionsProps {
     open: boolean;
@@ -7,9 +7,11 @@ interface ActionsProps {
     onEdit: () => void;
     onDelete: () => void;
     onClose: () => void;
+    onActivate: () => void;
+    heroActive: boolean;
 }
 
-export const Actions = ({ onEdit, onDelete, onClose, open, anchorEl }: ActionsProps) => {
+export const Actions = ({ onEdit, onDelete, onClose, onActivate, open, anchorEl, heroActive }: ActionsProps) => {
 
     return (
         <Menu
@@ -27,5 +29,7 @@ export const Actions = ({ onEdit, onDelete, onClose, open, anchorEl }: ActionsPr
         >
             <MenuItem onClick={onEdit}><Edit /></MenuItem>
             <MenuItem onClick={onDelete}><Delete /></MenuItem>
+            <MenuItem onClick={onActivate}><Switch onChange={onActivate} value={heroActive} /></MenuItem>
         </Menu>
-)}
+    )
+}

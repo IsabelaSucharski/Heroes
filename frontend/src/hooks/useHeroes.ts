@@ -30,7 +30,13 @@ export type HeroFormPayload = {
     universe: string;
     main_power: string;
     avatar_url: string;
+    is_active?: boolean;
 };
+
+export type activatePayload = {
+    is_active: boolean;
+};
+
 
 export function useHeroes(params?: HeroesQueryParams) {
     const buildUrl = () => {
@@ -77,7 +83,7 @@ export function useDeleteHero() {
 }
 
 export function useUpdateHero() {
-    const { trigger, isMutating, error } = useSWRMutation('/heroes', async (_key: string, { arg }: { arg: { heroId: string; payload: HeroFormPayload } }) => {
+    const { trigger, isMutating, error } = useSWRMutation('/heroes', async (_key: string, { arg }: { arg: { heroId: string; payload: HeroFormPayload | activatePayload } }) => {
         if (!arg?.heroId || !arg.payload) {
             throw new Error('Hero id and payload are required for update');
         }

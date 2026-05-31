@@ -1,4 +1,5 @@
 import axios from 'axios';
+import type { activatePayload } from '../hooks/useHeroes';
 
 export const api = axios.create({
   baseURL: 'http://localhost:3000',
@@ -36,7 +37,7 @@ export const updateHero = async (heroId: string, hero: {
   universe: string;
   main_power: string;
   avatar_url: string;
-}) => {
+} | activatePayload) => {
   const response = await api.put(`/heroes/${heroId}`, hero);
   return response.data;
 };

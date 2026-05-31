@@ -125,45 +125,36 @@ const createHero = async (req, res) => {
 const updateHero = async (req, res) => {
   const { id } = req.params;
 
-    const {
-    name,
-    nickname,
-    date_of_birth,
-    universe,
-    main_power,
-    avatar_url,
-    is_active
-  } = req.body;
+  const allowedFields = [
+    'name',
+    'nickname',
+    'date_of_birth',
+    'universe',
+    'main_power',
+    'avatar_url',
+    'is_active'
+  ];
 
-  const safeName = typeof name === 'undefined' ? null : name;
-  const safeNickname = typeof nickname === 'undefined' ? null : nickname;
-  const safeDateOfBirth = typeof date_of_birth === 'undefined' ? null : date_of_birth;
-  const safeUniverse = typeof universe === 'undefined' ? null : universe;
-  const safeMainPower = typeof main_power === 'undefined' ? null : main_power;
-  const safeAvatarUrl = typeof avatar_url === 'undefined' ? null : avatar_url;
-  const safeIsActive = typeof is_active === 'undefined' ? null : is_active;
+  const fields = [];
+  const values = [];
+
+  allowedFields.forEach((field) => {
+    if (Object.prototype.hasOwnProperty.call(req.body, field)) {
+      fields.push(`${field} = ?`);
+      const value = req.body[field];
+      values.push(typeof value === 'undefined' ? null : value);
+    }
+  });
+
+  if (fields.length === 0) {
+    return res.status(400).json({ message: 'Nenhum campo para atualizar' });
+  }
 
   const [result] = await connection.execute(
     `UPDATE heroes
-     SET
-      name = COALESCE(?, name),
-      nickname = COALESCE(?, nickname),
-      date_of_birth = COALESCE(?, date_of_birth),
-      universe = COALESCE(?, universe),
-      main_power = COALESCE(?, main_power),
-      avatar_url = COALESCE(?, avatar_url),
-      is_active = COALESCE(?, is_active)
+     SET ${fields.join(', ')}
      WHERE id = ?`,
-    [
-      safeName,
-      safeNickname,
-      safeDateOfBirth,
-      safeUniverse,
-      safeMainPower,
-      safeAvatarUrl,
-      safeIsActive,
-      id
-    ]
+    [...values, id]
   );
 
   if (result.affectedRows === 0) {

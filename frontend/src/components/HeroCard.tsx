@@ -10,9 +10,10 @@ type HeroCardProps = {
     onEdit?: (hero: Hero) => void;
     onDelete?: (heroId: string) => Promise<void> | void;
     onDeleteSuccess?: () => void;
+    onActivate?: (heroId: string, isActive: boolean) => Promise<void> | void;
 };
 
-export const HeroCard = ({ hero, onEdit, onDelete, onDeleteSuccess }: HeroCardProps) => {
+export const HeroCard = ({ hero, onEdit, onDelete, onDeleteSuccess, onActivate }: HeroCardProps) => {
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
     const openMenu = Boolean(anchorEl);
 
@@ -75,6 +76,8 @@ export const HeroCard = ({ hero, onEdit, onDelete, onDeleteSuccess }: HeroCardPr
                 onEdit={handleEdit}
                 onDelete={handleDelete}
                 onClose={handleCloseMenu}
+                onActivate={() => onActivate?.(hero.id, !hero.is_active)}
+                heroActive={hero.is_active}
             />
 
             <Modal
