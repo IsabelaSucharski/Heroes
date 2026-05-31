@@ -1,5 +1,5 @@
-import { Delete, Edit } from "@mui/icons-material"
-import { MenuItem, Menu, Switch } from "@mui/material"
+import { Delete, Edit } from "@mui/icons-material";
+import { MenuItem, Menu, ListItemIcon, ListItemText, Switch } from "@mui/material";
 
 interface ActionsProps {
     open: boolean;
@@ -12,7 +12,6 @@ interface ActionsProps {
 }
 
 export const Actions = ({ onEdit, onDelete, onClose, onActivate, open, anchorEl, heroActive }: ActionsProps) => {
-
     return (
         <Menu
             anchorEl={anchorEl}
@@ -27,9 +26,22 @@ export const Actions = ({ onEdit, onDelete, onClose, onActivate, open, anchorEl,
                 horizontal: 'left',
             }}
         >
-            <MenuItem onClick={onEdit}><Edit /></MenuItem>
-            <MenuItem onClick={onDelete}><Delete /></MenuItem>
-            <MenuItem onClick={onActivate}><Switch onChange={onActivate} value={heroActive} /></MenuItem>
+            <MenuItem onClick={onEdit} disabled={!heroActive}>
+                <ListItemIcon>
+                    <Edit fontSize="small" />
+                </ListItemIcon>
+                <ListItemText>Editar</ListItemText>
+            </MenuItem>
+
+            <MenuItem onClick={onDelete} disabled={!heroActive}>
+                <ListItemIcon>
+                    <Delete fontSize="small" />
+                </ListItemIcon>
+                <ListItemText>Excluir</ListItemText>
+            </MenuItem>
+            <MenuItem onClick={onActivate}>
+                <Switch checked={heroActive} onChange={onActivate} color="primary" />
+            </MenuItem>
         </Menu>
-    )
-}
+    );
+};
