@@ -1,7 +1,7 @@
 import { Delete, Edit } from "@mui/icons-material";
 import { MenuItem, Menu, ListItemIcon, ListItemText, Switch } from "@mui/material";
 
-interface ActionsProps {
+export interface ActionsProps {
     open: boolean;
     anchorEl: HTMLElement | null;
     onEdit: () => void;
