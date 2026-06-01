@@ -17,8 +17,10 @@ vi.mock('../../services/api', () => ({
 }));
 
 vi.mock('../../components/HeroCard', () => ({
-  HeroCard: ({ hero }: { hero: Hero }) => (
-    <div data-testid="hero-card">{hero.name}</div>
+  HeroCard: ({ hero, onViewDetails }: { hero: Hero; onViewDetails?: (hero: Hero) => void }) => (
+    <button type="button" data-testid="hero-card" onClick={() => onViewDetails?.(hero)}>
+      {hero.name}
+    </button>
   ),
 }));
 
@@ -102,6 +104,20 @@ describe('HeroesList', () => {
 
     expect(cards).toHaveLength(1);
     expect(cards[0]).toHaveTextContent('Batman');
+  });
+
+  it('deve abrir modal de detalhes ao clicar no herói', async () => {
+    const user = userEvent.setup();
+
+    render(<HeroesList />);
+
+    await user.click(screen.getByRole('button', { name: 'Batman' }));
+
+    expect(
+      screen.getByRole('heading', {
+        name: 'Detalhes de Batman',
+      })
+    ).toBeInTheDocument();
   });
 
   it('deve abrir modal de cadastro', async () => {

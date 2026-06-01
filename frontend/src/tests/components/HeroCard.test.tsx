@@ -75,6 +75,22 @@ describe('HeroCard', () => {
     expect(onEdit).toHaveBeenCalledWith(hero);
   });
 
+  it('deve chamar onViewDetails ao clicar no card', async () => {
+    const user = userEvent.setup();
+    const onViewDetails = vi.fn();
+
+    render(
+      <HeroCard
+        hero={hero}
+        onViewDetails={onViewDetails}
+      />
+    );
+
+    await user.click(screen.getByText('Batman'));
+
+    expect(onViewDetails).toHaveBeenCalledWith(hero);
+  });
+
   it('deve abrir modal de exclusão', async () => {
     const user = userEvent.setup();
 
