@@ -11,9 +11,10 @@ type HeroCardProps = {
     onDelete?: (heroId: string) => Promise<void> | void;
     onDeleteSuccess?: () => void;
     onActivate?: (heroId: string, isActive: boolean) => Promise<void> | void;
+    onViewDetails?: (hero: Hero) => void;
 };
 
-export const HeroCard = ({ hero, onEdit, onDelete, onDeleteSuccess, onActivate }: HeroCardProps) => {
+export const HeroCard = ({ hero, onEdit, onDelete, onDeleteSuccess, onActivate, onViewDetails }: HeroCardProps) => {
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
     const openMenu = Boolean(anchorEl);
     const [openDeleteModal, setOpenDeleteModal] = React.useState(false);
@@ -66,14 +67,19 @@ export const HeroCard = ({ hero, onEdit, onDelete, onDeleteSuccess, onActivate }
         }
     };
 
+    const handleViewDetails = () => {
+        onViewDetails?.(hero);
+    };
 
     return (
         <>
             <Card
+                onClick={handleViewDetails}
                 style={{
                     marginBottom: '16px',
                     backgroundColor: isActive ? undefined : '#f5f5f5',
                     color: isActive ? undefined : '#777',
+                    cursor: 'pointer',
                 }}
             >
                 <CardContent>

@@ -21,9 +21,21 @@ export const HeroesList = () => {
   const [openSnackbar, setOpenSnackbar] = React.useState(false);
   const [snackbarMessage, setSnackbarMessage] = React.useState('');
   const [snackbarSeverity, setSnackbarSeverity] = React.useState<'error' | 'success'>('error');
+  const [selectedHero, setSelectedHero] = React.useState<Hero | null>(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = React.useState(false);
 
   const handleOpenCloseModal = () => {
     setIsModalOpen((prev) => !prev);
+  };
+
+  const handleOpenHeroDetail = (hero: Hero) => {
+    setSelectedHero(hero);
+    setIsDetailModalOpen(true);
+  };
+
+  const handleCloseHeroDetail = () => {
+    setIsDetailModalOpen(false);
+    setSelectedHero(null);
   };
 
   const handleSearch = () => {
@@ -173,6 +185,7 @@ export const HeroesList = () => {
               onDelete={handleDeleteHero}
               onDeleteSuccess={() => refresh()}
               onActivate={handleActivateHero}
+              onViewDetails={handleOpenHeroDetail}
             />
           ))}
 
@@ -223,6 +236,38 @@ export const HeroesList = () => {
         )}
       </Modal>
 
+      <Modal
+        open={isDetailModalOpen}
+        onClose={handleCloseHeroDetail}
+        title={selectedHero ? `Detalhes de ${selectedHero.name}` : 'Detalhes do Herói'}
+        actions={
+          <>
+            <Button onClick={handleCloseHeroDetail}>Fechar</Button>
+          </>
+        }
+      >
+        {selectedHero && (
+          <Box sx={{ display: 'grid', gap: 2, mt: 1 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <img
+                src={selectedHero.avatar_url}
+                alt={selectedHero.name}
+                style={{ width: 96, height: 96, borderRadius: 12, objectFit: 'cover' }}
+              />
+              <Box>
+                <Typography variant="h6">{selectedHero.name}</Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {selectedHero.nickname}
+                </Typography>
+              </Box>
+            </Box>
+            <Typography><strong>Universo:</strong> {selectedHero.universe}</Typography>
+            <Typography><strong>Poder principal:</strong> {selectedHero.main_power}</Typography>
+            <Typography><strong>Data de nascimento:</strong> {selectedHero.date_of_birth}</Typography>
+            <Typography><strong>Status:</strong> {selectedHero.is_active ? 'Ativo' : 'Inativo'}</Typography>
+          </Box>
+        )}
+      </Modal>
 
       <Snackbar open={openSnackbar} autoHideDuration={3000} onClose={() => setOpenSnackbar(false)}>
         <Alert severity={snackbarSeverity}>{snackbarMessage}</Alert>
