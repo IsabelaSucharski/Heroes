@@ -42,7 +42,7 @@ vi.mock('../../components/Loading', () => ({
 
 const mockedUseHeroes = vi.mocked(useHeroes);
 
-describe.only('HeroesList', () => {
+describe('HeroesList', () => {
   beforeEach(async () => {
     vi.clearAllMocks();
 
